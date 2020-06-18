@@ -1,27 +1,41 @@
 import React from 'react';
+import { Switch, Route } from 'react-router-dom';
+import SiteWrapper from './client/components/organisms/site-wrapper';
+import HomePage from './client/pages/home';
+import { ApolloProvider } from '@apollo/react-hooks';
+import ApolloClient from 'apollo-boost';
+import UserService from './client/services/userService';
+import 'cross-fetch/polyfill';
 
-import logo from './logo.svg';
-import './App.css';
+export const serverUrl = process.env.SERVER_URI || 'http://localhost:4000';
 
+export const apolloClient = new ApolloClient({
+  uri: serverUrl
+});
+
+export const authService = new UserService();
+authService.user.subscribe(user => {
+  if (user) {
+    console.log('Authorized');
+  } else {
+    console.log('Not Authorized');
+  }
+});
 const App: React.FC = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <ApolloProvider client={apolloClient}>
+      <SiteWrapper>
+        <Switch>
+          <Route path="/settings">
+            <p>Settings</p>
+          </Route>
+          <Route path="/">
+            <HomePage />
+          </Route>
+        </Switch>
+      </SiteWrapper>
+    </ApolloProvider>
   );
-}
+};
 
 export default App;
